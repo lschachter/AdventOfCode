@@ -13,8 +13,10 @@ def main():
 	childIndeces = mapStartingIndex(stepsByChildren, CHILD_INDEX)
 	parentIndeces = mapStartingIndex(stepsByParents, PARENT_INDEX)
 			
-	order = buildOutput(validSteps, stepsByParents, parentIndeces, stepsByChildren, childIndeces)
-	print(order)
+	# order = buildOutput(validSteps, stepsByParents, parentIndeces, stepsByChildren, childIndeces)
+	# print(order)
+
+	timeShit(validSteps, stepsByChildren, stepsByParents, childIndeces, parentIndeces)
 
 	
 def mapStartingIndex(steps, sorter):
@@ -71,7 +73,20 @@ def isValid(ch, order, stepsByChildren, childIndeces):
 	return True
 
 	
+# def timeShit(validSteps, stepsByChildren, stepsByParents, childIndeces, parentIndeces):
+# 	abcs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+# 	numSecs = {let: num + 1 for num, let in enumerate(abcs)}
 
+# 	numWorkers = 2
+
+# 	print("Second    Worker1    Worker2    Done")
+
+# 	while validSteps:
+		
+
+
+# def printMe(second, worker1, worker2, done):
+# 	print(second, '  ', worker1, '  ', worker2, '  ', done)
 
 
 

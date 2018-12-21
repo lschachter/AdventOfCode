@@ -6,12 +6,12 @@ def findLetters():
 
 	for boxID1 in ids[:-1]:
 		for boxID2 in ids[j:]:
-			if findDiff(boxID1, boxID2):
+			if isValid(boxID1, boxID2):
 				return findCommon(boxID1, boxID2)
 		j += 1
 
 
-def findDiff(id1, id2):
+def isValid(id1, id2):
 	diffs = 0
 	idLen = len(id1)
 
