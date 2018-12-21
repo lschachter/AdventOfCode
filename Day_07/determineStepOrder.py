@@ -1,133 +1,164 @@
-CHILD_INDEX = 1
-PARENT_INDEX = 0
 
 def main():
-	# reqs = open('sleighInstructions.txt', 'r').read().split('\n')
-	reqs = open('fakeInstructions.txt', 'r').read().split('\n')
+	reqs = open('sleighInstructions.txt', 'r').read().split('\n')
+	# reqs = open('fakeInstructions.txt', 'r').read().split('\n')
 	reqs = [req.upper() for req in reqs]
 	reqs = [tuple(step[0] for step in req.split('STEP ')[1:]) for req in reqs]
 	validSteps = sorted(list(set(step[0] for step in reqs) - set(step[1] for step in reqs)))
-	stepsByChildren = sorted(reqs, key = lambda pair: pair[CHILD_INDEX])
-	stepsByParents = sorted(reqs, key = lambda pair: pair[PARENT_INDEX])
-
-	childIndeces = mapStartingIndex(stepsByChildren, CHILD_INDEX)
-	parentIndeces = mapStartingIndex(stepsByParents, PARENT_INDEX)
-			
-	# order = buildOutput(validSteps, stepsByParents, parentIndeces, stepsByChildren, childIndeces)
+	steps = buildSteps(reqs)
+	
+	# order = buildOutput(validSteps, steps)
 	# print(order)
 
-	timeShit(validSteps, stepsByChildren, stepsByParents, childIndeces, parentIndeces)
+	baseSecsPerStep = 61
+	numWorkers = 5
 
-	
-def mapStartingIndex(steps, sorter):
-	startingIndeces = {steps[0][sorter]: 0}
-	pointer = 0
-	for i in range(1, len(steps)):
-		step = steps[i][sorter]
-		if step in startingIndeces:
-			pointer += 1
+	timeSpent = buildInParallel(validSteps, steps, numWorkers, baseSecsPerStep)
+	print(timeSpent)
+
+
+def buildSteps(reqs):
+	nodes = {}
+	for req in reqs:
+		child = req[1]
+		parent = req[0]
+		if parent in nodes:
+			pNode = nodes[parent]
 		else:
-			startingIndeces[step] = i
+			pNode = Step(parent)
+			nodes[parent] = pNode
 
-	return startingIndeces
+		if child in nodes:
+			cNode = nodes[child]
+		else:
+			cNode = Step(child)
+			nodes[child] = cNode
+
+		pNode.children.append(cNode)
+		cNode.parents.append(pNode)
+
+	return nodes
 
 
-def buildOutput(validSteps, stepsByParents, parentIndeces, stepsByChildren, childIndeces):
+def buildOutput(validSteps, allSteps):
 	order = ""
 
 	while validSteps:
-		nextStep = validSteps.pop(0)
-		order += nextStep
-		if nextStep in parentIndeces:
-			findValidChildren(nextStep, order, stepsByParents, parentIndeces, stepsByChildren, childIndeces, validSteps)
+		stepName = validSteps.pop(0)
+		order += stepName
+		step = allSteps[stepName]
+		if step.children:
+			addValidChildren(step, order, validSteps)
 
 	return order
 
 
-def findValidChildren(nextStep, order, stepsByParents, parentIndeces, stepsByChildren, childIndeces, validSteps):
-	i = parentIndeces[nextStep]
-	childStep = stepsByParents[i]
-	while childStep[PARENT_INDEX] == nextStep:
-		child = childStep[CHILD_INDEX]
-		if isValid(child, order, stepsByChildren, childIndeces):
-			validSteps.append(child)
-			validSteps.sort()
-		i += 1
-		if i < len(stepsByParents):
-			childStep = stepsByParents[i]
-		else:
-			break
+def addValidChildren(step, order, validSteps):
+	for child in step.children:
+		if isValid(child, order):
+			validSteps.append(child.name)
+			validSteps.sort() # BAD
 
 
-def isValid(ch, order, stepsByChildren, childIndeces):
-	i = childIndeces[ch]
-	parentStep = stepsByChildren[i]
-	while parentStep[CHILD_INDEX] == ch:
-		if parentStep[PARENT_INDEX] not in order:
+def isValid(step, order):
+	for parent in step.parents:
+		if parent.name not in order:
 			return False
-		i += 1
-		if i < len(stepsByChildren):
-			parentStep = stepsByChildren[i]
-		else:
-			break
+
 	return True
 
+
+class Step:
+		def __init__(self, name):
+			self.name = name
+			self.children = []
+			self.parents = []
+
+
+
 	
-# def timeShit(validSteps, stepsByChildren, stepsByParents, childIndeces, parentIndeces):
-# 	abcs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-# 	numSecs = {let: num + 1 for num, let in enumerate(abcs)}
+def buildInParallel(validSteps, allSteps, numWorkers, baseSecsPerStep):
+	abcs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+	secsPerStep = {let: num + baseSecsPerStep for num, let in enumerate(abcs)}
 
-# 	numWorkers = 2
+	order = ""
+	workers = []
+	for i in range(numWorkers):
+		worker = Worker(str(i + 1))
+		workers.append(worker)
 
-# 	print("Second    Worker1    Worker2    Done")
+	# print("Second    Worker1    Worker2    Done")
+	second = 0
+	currentJobs = []
 
-# 	while validSteps:
+	while validSteps or currentJobs:
+		for job in currentJobs:
+			worker = job[0]
+			stepName = job[1]
+			step = allSteps[stepName]
+
+			worker.busyFor -= 1
+			if worker.busyFor == 0:
+				setWorkerFree(worker)
+				order += stepName
+				# BAD
+				if step.children:
+					addValidChildren(step, order, validSteps)
+
+		currentJobs = [job for job in currentJobs if job[0].isWorking]
+		currentJobs += startNewSteps(workers, validSteps, secsPerStep)
+		# printMe(second, workers[0].currentJob, workers[1].currentJob, order)
+		second += 1
+
+	return second - 1
+
+
+def setWorkerFree(worker):
+	worker.isWorking = False
+	worker.currentJob = None
+
+
+def startNewSteps(workers, validSteps, secsPerStep):
+	availableWorker = findAvailableWorker(workers)
+	newJobs = []
+
+	while len(validSteps) > 0 and availableWorker:
+		nextStep = validSteps.pop(0)
+		setWorker(availableWorker, nextStep, secsPerStep)
 		
+		newJobs.append((availableWorker, nextStep))
+		availableWorker = findAvailableWorker(workers)
+
+	return newJobs
 
 
-# def printMe(second, worker1, worker2, done):
-# 	print(second, '  ', worker1, '  ', worker2, '  ', done)
+def printMe(second, worker1, worker2, done):
+	print(second, '\t    ', worker1, '\t      ', worker2, '\t  ', done)
 
 
+def findAvailableWorker(workers):
+	for worker in workers:
+		if not worker.isWorking:
+			return worker
+	return False
 
 
-	
+def setWorker(worker, nextStep, secsPerStep):
+	worker.isWorking = True
+	worker.currentJob = nextStep
+	worker.busyFor = secsPerStep[nextStep]
 
 
+class Worker:
+	def __init__(self, name):
+		self.name = name
+		self.isWorking = False
+		self.currentJob = None
+		self.busyFor = 0
 
 
-
-
-
-
-
-
-
-
-
-'''
-print(steps)
-
-	stepNodes = {}
-
-	validSteps = sorted(list(set(step[0] for step in steps) - set(step[1] for step in steps)))
-
-	for step in steps:
-		reqName = step[0]
-		childName = step[1]
-		if reqName in stepNodes:
-			stepNodes[reqName].append(childName)
-		else:
-			stepNodes[reqName] = [childName]
-
-x = set()
-	for step in validSteps:
-		print(step, ":", sorted(stepNodes[step]))
-		x |= set(stepNodes[step])
-
-
-{'B', 'U', 'A', 'Y', 'E', 'Z', 'K', 'T', 'M', 'G', 'O', 'P', 'L', 'J'}
-'''
+	def __str__(self):
+		return f'Worker #{self.name}: working ? {self.isWorking} on {self.currentJob} for {self.busyFor} seconds'
 
 
 main()

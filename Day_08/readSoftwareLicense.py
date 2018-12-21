@@ -74,6 +74,7 @@ def determineRootValue(node):
 			if index - 1 < node.numChildren:
 				child = node.children[index - 1]
 				if child.value != 0:
+					# should be different so don't have to count 0sum nodes again
 					node.value += child.value
 				else:
 					node.value += determineRootValue(node.children[index - 1])
