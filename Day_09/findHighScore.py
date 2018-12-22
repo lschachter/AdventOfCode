@@ -74,39 +74,4 @@ def findHighScore(scores):
 	return max(scores.values())
 
 
-
-
-
-
-
-
-
-'''
-
-def playGame(numPlayers, numMarbles):
-	scores = {player: 0 for player in range(numPlayers)}
-	currentMarbleIndex = 0
-	player = 1
-	circle = [0]
-
-	for marbleNum in range(1, numMarbles + 1):
-		if marbleNum % 23 == 0:
-			scores[player] += marbleNum
-			currentMarbleIndex = (currentMarbleIndex - 7) % len(circle)
-			scores[player] += circle.pop(currentMarbleIndex)
-		else:
-			currentMarbleIndex += 2
-			if currentMarbleIndex > len(circle):
-				currentMarbleIndex = 1	
-			circle.insert(currentMarbleIndex, marbleNum)
-		player = (player + 1) % numPlayers
-	return scores
-
-
-
-
-
-'''
-
-
 main()
