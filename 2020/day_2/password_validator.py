@@ -9,6 +9,7 @@ min_ch <= password.count(valid_ch) <= max_ch cool let's go with that
 
 import collections
 
+
 def parse_passwords():
     password_data_file = open('2020/day_2/passwords.text', 'r')
     password_data = password_data_file.read().split('\n')
@@ -28,8 +29,7 @@ def parse_passwords():
         ch = rule_string[-1]
         # grosssssssssssssss
         min_val, max_val = map(int, rule_string[:-1].split('-'))
-        rule = Rule(ch, min_val, max_val)
-        rules.append(rule)
+        rules.append(Rule(ch, min_val, max_val))
 
     return rules, passwords
 
@@ -37,19 +37,17 @@ def parse_passwords():
 def validate_passwords(validator):
     rules, passwords = parse_passwords()
     valid = 0
-
     num_passwords = len(passwords)
+
     for i in range(num_passwords):
-        if validator(rules[i], passwords[i]):
-            valid += 1
+        valid = valid + 1 if validator(rules[i], passwords[i]) else valid
 
     return valid
 
-def is_sled_valid(rule, password):
-    if rule.min_val <= password.count(rule.ch) <= rule.max_val:
-        return True
 
-    return False
+def is_sled_valid(rule, password):
+    return True if rule.min_val <= password.count(rule.ch) <= rule.max_val else False
+
 
 def is_toboggan_valid(rule, password):
     if (
