@@ -34,37 +34,32 @@ def parse_passwords():
     return rules, passwords
 
 
-def validate_passwords_sled():
+def validate_passwords(validator):
     rules, passwords = parse_passwords()
     valid = 0
 
     num_passwords = len(passwords)
     for i in range(num_passwords):
-        rule = rules[i]
-        if rule.min_val <= passwords[i].count(rule.ch) <= rule.max_val:
+        if validator(rules[i], passwords[i]):
             valid += 1
 
     return valid
 
-def validate_passwords_toboggan():
-    rules, passwords = parse_passwords()
-    valid = 0
+def is_sled_valid(rule, password):
+    if rule.min_val <= password.count(rule.ch) <= rule.max_val:
+        return True
 
-    num_passwords = len(passwords)
-    for i in range(num_passwords):
-        rule = rules[i]
-        password = passwords[i]
+    return False
 
-        if password[rule.min_val - 1] == rule.ch and password[rule.max_val - 1] == rule.ch:
-            continue
-        if password[rule.min_val - 1] != rule.ch and password[rule.max_val - 1] != rule.ch:
-            continue
+def is_toboggan_valid(rule, password):
+    if (
+        (password[rule.min_val - 1] != rule.ch and password[rule.max_val - 1] == rule.ch)
+        or (password[rule.min_val - 1] == rule.ch and password[rule.max_val - 1] != rule.ch)
+    ):
+        return True
 
-        valid += 1
-
-    return valid
+    return False
 
 
-
-# print(validate_passwords_sled())
-print(validate_passwords_toboggan())
+print(validate_passwords(is_sled_valid))
+print(validate_passwords(is_toboggan_valid))
