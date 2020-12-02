@@ -10,14 +10,16 @@ min_ch <= password.count(valid_ch) <= max_ch cool let's go with that
 import collections
 
 def parse_passwords():
-    password_data = open('passwords.text', 'r').read()
-    password_data = password_data.split('\n')
+    password_data_file = open('2020/day_2/passwords.text', 'r')
+    password_data = password_data_file.read().split('\n')
     rule_strings = []
     passwords = []
     for tup in password_data:
         rule, password = tup.split(': ')
         rule_strings.append(rule)
         passwords.append(password)
+
+    password_data_file.close()
 
     rules = []
     Rule = collections.namedtuple('Rule', 'ch min_val max_val')

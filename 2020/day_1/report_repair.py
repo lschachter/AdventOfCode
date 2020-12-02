@@ -5,8 +5,12 @@
 # in which case there is no answer.
 
 def build_expense_list():
-    report = open('expense_report.txt', 'r').read()
-    return list(map(int, report.split('\n')))
+    report_file = open('2020/day_1/expense_report.txt', 'r')
+    expenses = list(map(int, report_file.read().split('\n')))
+
+    report_file.close()
+    return expenses
+
 
 def sum_two(k, expenses):
     expenses = sorted(expenses)
