@@ -48,4 +48,4 @@ def sum_three(k, expenses):
 
 expenses = build_expense_list()
 # print(sum_two(2020, expenses))
-print(sum_three(2020, expenses))
+# print(sum_three(2020, expenses))
