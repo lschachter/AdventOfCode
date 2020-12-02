@@ -13,34 +13,26 @@ import collections
 def parse_passwords():
     password_data_file = open('2020/day_2/passwords.text', 'r')
     password_data = password_data_file.read().split('\n')
-    rule_strings = []
-    passwords = []
-    for tup in password_data:
-        rule, password = tup.split(': ')
-        rule_strings.append(rule)
-        passwords.append(password)
+
+    Rule = collections.namedtuple('Rule', 'ch min_val max_val password')
+    rules = []
+
+    for line in password_data:
+        vals, ch, password = line.split()
+        ch = ch[0]
+        min_val, max_val = map(int, vals.split('-'))
+        rules.append(Rule(ch, min_val, max_val, password))
 
     password_data_file.close()
-
-    rules = []
-    Rule = collections.namedtuple('Rule', 'ch min_val max_val')
-
-    for rule_string in rule_strings:
-        ch = rule_string[-1]
-        # grosssssssssssssss
-        min_val, max_val = map(int, rule_string[:-1].split('-'))
-        rules.append(Rule(ch, min_val, max_val))
-
-    return rules, passwords
+    return rules
 
 
-def validate_passwords(validator):
-    rules, passwords = parse_passwords()
+def validate_passwords(validate):
+    rules = parse_passwords()
     valid = 0
-    num_passwords = len(passwords)
 
-    for i in range(num_passwords):
-        valid = valid + 1 if validator(rules[i], passwords[i]) else valid
+    for rule in rules:
+        valid = valid + 1 if validate(rule, rule.password) else valid
 
     return valid
 
