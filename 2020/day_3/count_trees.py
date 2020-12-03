@@ -21,7 +21,7 @@ def count_trees(x, y):
     trees = 0
 
     while i < num_rows:
-        trees = trees + 1 if tree_map[i][j] == TREE else trees
+        trees += 1 if tree_map[i][j] == TREE else 0
         i += y
         j = (j + x) % num_cols
 

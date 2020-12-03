@@ -32,7 +32,7 @@ def validate_passwords(validate):
     valid = 0
 
     for rule in rules:
-        valid = valid + 1 if validate(rule, rule.password) else valid
+        valid += 1 if validate(rule, rule.password) else 0
 
     return valid
 
