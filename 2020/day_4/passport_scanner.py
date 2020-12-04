@@ -8,34 +8,35 @@ def parse_passports():
 
     return passports
 
-def validate_passports1():
-    required_fields = {'byr', 'iyr', 'eyr', 'hgt', 'hcl', 'ecl', 'pid'}
-
+def validate_passports(validate):
     passports = parse_passports()
-    passports = map(lambda passport: re.split('\n| ', passport), passports)
+    passport_data = map(lambda passport: re.split('\n| ', passport), passports)
 
-    passports_data = []
+    passports = []
 
-    for passport in passports:
+    for passport in passport_data:
         pass_dict = {}
         for field in passport:
             key, value = field.split(':')
             pass_dict[key] = value
 
-        passports_data.append(pass_dict)
+        passports.append(pass_dict)
 
     valid_passports = 0
 
-    for passport in passports_data:
-        keys = set(passport.keys())
-        valid_passports += 1 if required_fields.issubset(keys) else 0
+    for passport in passports:
+        valid_passports += 1 if validate(passport) else 0
 
     return valid_passports
 
 
-#print(validate_passports1())
+def validate_field_existence(passport):
+    required_fields = {'byr', 'iyr', 'eyr', 'hgt', 'hcl', 'ecl', 'pid'}
 
-def validate_passports():
+    return True if required_fields.issubset(set(passport.keys())) else False
+
+
+def validate_passport(passport):
     rules = {
         'byr': {'length': 4, 'range': range(1920, 2003),},
         'iyr': {'length': 4, 'range': range(2010, 2021),},
@@ -46,61 +47,39 @@ def validate_passports():
         'pid': {'length': 9}
     }
 
-    passports = parse_passports()
-    passports = map(lambda passport: re.split('\n| ', passport), passports)
+    if not validate_field_existence(passport):
+        return False
 
-    passports_data = []
+    if passport['ecl'] not in rules['ecl']:
+        return False
 
-    for passport in passports:
-        pass_dict = {}
-        for field in passport:
-            key, value = field.split(':')
-            pass_dict[key] = value
+    height = passport['hgt']
+    if height[-2:] not in ['in', 'cm']:
+        return False
 
-        passports_data.append(pass_dict)
+    height_val = int(height[:-2])
+    unit = height[-2:]
+    if height_val not in rules['hgt'][unit]:
+        return False
 
-    valid_passports = 0
+    hair_color = passport['hcl']
+    if hair_color[0] != '#':
+        return False
 
-    for passport in passports_data:
-        keys = set(passport.keys())
+    hair_color = hair_color[1:]
 
-        if not set(rules.keys()).issubset(keys):
-            continue
+    for ch in hair_color:
+        if ch not in rules['hcl']['valid']:
+            return False
 
-        if passport['ecl'] not in rules['ecl']:
-            continue
+    length_rules = ['byr', 'iyr', 'eyr', 'pid', 'hcl']
+    for field in length_rules:
+        if len(passport[field]) != rules[field]['length']:
+            return False
 
-        height = passport['hgt']
-        if height[-2:] not in ['in', 'cm']:
-            continue
+        if field not in {'pid', 'hcl'} and int(passport[field]) not in rules[field]['range']:
+            return False
 
-        height_val = int(height[:-2])
-        unit = height[-2:]
-        if height_val not in rules['hgt'][unit]:
-            continue
+    return True
 
-        hair_color = passport['hcl']
-        if hair_color[0] != '#':
-            continue
-
-        hair_color = hair_color[1:]
-
-        is_valid = True
-
-        for ch in hair_color:
-            if ch not in rules['hcl']['valid']:
-                is_valid = False
-                break
-
-        length_rules = ['byr', 'iyr', 'eyr', 'pid', 'hcl']
-        for field in length_rules:
-            is_valid = False if len(passport[field]) != rules[field]['length'] else is_valid
-
-            if field not in {'pid', 'hcl'} and int(passport[field]) not in rules[field]['range']:
-                is_valid = False
-
-        valid_passports += 1 if is_valid else 0
-
-    return valid_passports
-
-print(validate_passports())
+print(validate_passports(validate_passport))
