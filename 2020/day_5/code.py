@@ -9,27 +9,38 @@ def parse_input_file():
 def scan_seats():
     seat_strings = parse_input_file()
 
-    row_min, row_max = 0, 127
-    col_min, col_max = 0, 7
+    row_max, col_max = 127, 7
     row_up, col_up = 'B', 'R'
 
     seats = {}
 
     for seat in seat_strings:
-        row = binary_search(row_up, seat[:7], row_min, row_max)
-        col = binary_search(col_up, seat[7:], col_min, col_max)
+        row = binary_search_simple(row_up, seat[:7], row_max)
+        col = binary_search_simple(col_up, seat[7:], col_max)
         seats[seat] = {'row': row, 'col': col}
         seats[seat]['id'] = (seats[seat]['row'] * 8) + col
 
     ids = [seats[seat]['id'] for seat in seats]
-    # return max(ids)
     ids.sort()
 
     for i in range(1, len(ids)):
         if ids[i - 1] == ids[i] - 2:
-            return ids[i] - 1
+            return max(ids), ids[i] - 1
 
-def binary_search(up, instructions, minimum, maximum):
+def binary_search_simple(up, instructions, maximum):
+    minimum = 0
+
+    for ch in instructions:
+        mid = (minimum + maximum + 1) // 2
+
+        if ch == up:
+            minimum = mid
+        else:
+            maximum = mid
+
+    return minimum
+
+def binary_search_recursive(up, instructions, minimum, maximum):
     if len(instructions) == 0:
         return minimum
 
