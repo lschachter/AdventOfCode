@@ -1,5 +1,6 @@
 import re
 
+
 def parse_passports():
     passports_file = open('2020/day_4/passports.text', 'r')
     passports = passports_file.read().split('\n\n')
@@ -29,12 +30,10 @@ def validate_passports(validate):
 
     return valid_passports
 
-
 def validate_field_existence(passport):
     required_fields = {'byr', 'iyr', 'eyr', 'hgt', 'hcl', 'ecl', 'pid'}
 
     return True if required_fields.issubset(set(passport.keys())) else False
-
 
 def validate_passport(passport):
     rules = {
@@ -53,22 +52,18 @@ def validate_passport(passport):
     if passport['ecl'] not in rules['ecl']:
         return False
 
-    height = passport['hgt']
-    if height[-2:] not in ['in', 'cm']:
+    if passport['hgt'][-2:] not in ['in', 'cm']:
         return False
 
-    height_val = int(height[:-2])
-    unit = height[-2:]
+    height_val = int(passport['hgt'][:-2])
+    unit = passport['hgt'][-2:]
     if height_val not in rules['hgt'][unit]:
         return False
 
-    hair_color = passport['hcl']
-    if hair_color[0] != '#':
+    if passport['hcl'][0] != '#':
         return False
 
-    hair_color = hair_color[1:]
-
-    for ch in hair_color:
+    for ch in passport['hcl'][1:]:
         if ch not in rules['hcl']['valid']:
             return False
 
