@@ -5,35 +5,15 @@ def parse_input_file():
 
     return data
 
-def get_game_data(data):
+def get_game_ops(data):
     ops = []
     for line in data:
         op, num = line.split(' ')
         ops.append([op, int(num)])
 
-    hits = [0] * len(ops)
+    return ops
 
-    return ops, hits
-
-def run_game_loop(ops, hits):
-    num_ops = len(ops)
-    total = 0
-    i = 0
-
-    while i < num_ops:
-        hits[i] += 1
-
-        op, num = ops[i]
-        i += 1 if op in ['acc', 'nop'] else num
-
-        if hits[i] >= 1:
-            return total
-
-        total += num if op == 'acc' else 0
-
-    return total
-
-def run_game_loop2(ops, num_ops):
+def run_game_loop(ops, num_ops):
     i = total = 0
     hits = [0] * num_ops
 
@@ -48,32 +28,40 @@ def run_game_loop2(ops, num_ops):
 
     return total, True
 
-def swap_op(change_i, ops, num_ops):
+def swap_next_op(change_i, ops):
     if change_i is not None:
         ops[change_i][0] = 'jmp' if ops[change_i][0] == 'nop' else 'nop'
         change_i += 1
     else:
         change_i = 0
 
-    for i in range(change_i, num_ops):
-        if ops[i][0] in ['jmp', 'nop']:
-            ops[i][0] = 'jmp' if ops[i][0] == 'nop' else 'nop'
-            return i
+    while ops[change_i][0] not in ['jmp', 'nop']:
+        change_i += 1
 
-def parse_input():
+    ops[change_i][0] = 'jmp' if ops[change_i][0] == 'nop' else 'nop'
+
+    return change_i
+
+def parse_input(game_runner):
     data = parse_input_file()
-    ops, _ = get_game_data(data)
+    ops = get_game_ops(data)
 
-    total, is_complete = 0, False
-    change_i = None
     num_ops = len(ops)
 
-    while is_complete is False:
-        total, is_complete = run_game_loop2(ops, num_ops)
-        if is_complete == False:
-            change_i = swap_op(change_i, ops, num_ops)
+    return game_runner(ops, num_ops)
 
+def run_until_break(ops, num_ops):
+    return run_game_loop(ops, num_ops)[0]
+
+def run_full_game(ops, num_ops):
+    is_complete = False
+    change_i = None
+
+    while is_complete is False:
+        total, is_complete = run_game_loop(ops, num_ops)
+        change_i = swap_next_op(change_i, ops) if is_complete == False else change_i
 
     return total
 
-print(parse_input())
+
+print(parse_input(run_full_game))
