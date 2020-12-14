@@ -63,5 +63,6 @@ def run_full_game(ops, num_ops):
 
     return total
 
+
 print(parse_input(run_until_break))
 print(parse_input(run_full_game))
