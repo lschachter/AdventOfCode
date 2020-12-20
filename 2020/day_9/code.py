@@ -10,7 +10,7 @@ def decrypt_data(data, preamble_length):
 
     for i in range(preamble_length, data_length):
         if can_two_sum(data[i], data[(i - preamble_length): i]) is False:
-            return i, data[i]
+            return i
 
 def can_two_sum(k, nums):
     nums = sorted(nums)
@@ -31,7 +31,8 @@ def can_two_sum(k, nums):
 def find_weakness():
     data = parse_input_file()
 
-    index, invalid = decrypt_data(data, 25)
+    index = decrypt_data(data, 25)
+    invalid = data[index]
     start, end = sum_set(data, index, invalid)
     invalid_list = data[start: end + 1]
 
