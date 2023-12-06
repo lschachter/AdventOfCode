@@ -30,7 +30,7 @@ def puzzle1():
 
 
 def puzzle2():
-    num_cards = {i: 1 for i in range(len(data))}
+    num_cards = [1 for _ in range(len(data))]
 
     for id, card in enumerate(data):
         winners, numbers = card.split(" | ")
@@ -47,7 +47,7 @@ def puzzle2():
         for i in range(id + 1, id + 1 + num_copies):
             num_cards[i] += num_cards[id]
 
-    print(sum(num_cards.values()))
+    print(sum(num_cards))
 
 
 puzzle2()
