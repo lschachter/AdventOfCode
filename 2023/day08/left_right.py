@@ -32,9 +32,6 @@ def puzzle1():
 
     nodes = [node[0] for node in nodes.values()]
 
-    # for node in nodes:
-    #     print(node)
-
     for node in nodes:
         if node.name == "AAA":
             break
@@ -53,11 +50,6 @@ def puzzle1():
 
 
 # puzzle1()
-
-
-# taken from https://stackoverflow.com/questions/51716916/built-in-module-to-calculate-the-least-common-multiple
-def lcm(a, b):
-    return abs(a * b) // math.gcd(a, b)
 
 
 def puzzle2():
@@ -94,7 +86,7 @@ def puzzle2():
         pool = multiprocessing.Pool(processes=len(starting_nodes))
         outputs = pool.map(find_z, starting_nodes)
 
-        print(reduce(lcm, outputs))
+        print(reduce(math.lcm, outputs))
 
 
 puzzle2()
