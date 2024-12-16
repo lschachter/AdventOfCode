@@ -10,39 +10,23 @@ def move_boxes():
 
     i, j = find_start()
 
-    # for row in grid:
-    #     print(row)
-    # print()
-
     for move in instructions:
         x, y = directions[move]
         new_i = i + x
         new_j = y + j
 
-        # print(move)
+        a, b = new_i, new_j
+        while grid[a][b] not in ["#", "."]:
+            a += x
+            b += y
 
-        if grid[new_i][new_j] == "#":  # do each separately then combine
+        if grid[a][b] == "#":
             continue
 
-        elif grid[new_i][new_j] == ".":
-            grid[i][j], grid[new_i][new_j] = grid[new_i][new_j], grid[i][j]
-            i, j = new_i, new_j
-        else:
-            # print("hi")
-            # print(grid[new_i][new_j])
-            a, b = new_i, new_j
-            while grid[a][b] not in ["#", "."]:
-                a += x
-                b += y
-
-            # print(a, b, grid[a][b])
-            if grid[a][b] == "#":
-                continue
-
-            grid[a][b] = "O"
-            grid[i][j] = "."
-            grid[new_i][new_j] = "@"
-            i, j = new_i, new_j
+        grid[a][b] = "O"
+        grid[i][j] = "."
+        grid[new_i][new_j] = "@"
+        i, j = new_i, new_j
 
         # for row in grid:
         #     print(row)
