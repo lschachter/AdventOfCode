@@ -7,13 +7,7 @@ data_file.close()
 
 
 def find_antinodes():
-    node_positions = defaultdict(list)
-
-    for i in range(len(data)):
-        for j in range(len(data[0])):
-            if data[i][j] != ".":
-                node_positions[data[i][j]].append((i, j))
-
+    node_positions = find_node_positions()
     antinodes = set()
 
     for node_type in node_positions:
@@ -50,13 +44,7 @@ def find_antinodes():
 
 
 def find_antinodes_with_harmony():
-    node_positions = defaultdict(list)
-
-    for i in range(len(data)):
-        for j in range(len(data[0])):
-            if data[i][j] != ".":
-                node_positions[data[i][j]].append((i, j))
-
+    node_positions = find_node_positions()
     antinodes = set()
 
     for node_type in node_positions:
@@ -88,6 +76,17 @@ def find_antinodes_with_harmony():
                     j = j + y_diff if node[1] < next_node[1] else j - y_diff
 
     return len(antinodes)
+
+
+def find_node_positions():
+    node_positions = defaultdict(list)
+
+    for i in range(len(data)):
+        for j in range(len(data[0])):
+            if data[i][j] != ".":
+                node_positions[data[i][j]].append((i, j))
+
+    return node_positions
 
 
 # print(find_antinodes())
