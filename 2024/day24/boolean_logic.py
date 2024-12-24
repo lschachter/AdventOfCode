@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List
 
 data_file = open("input.txt", "r")
 gates, rules = data_file.read().split("\n\n")
@@ -7,22 +7,16 @@ data_file.close()
 gates = gates.split("\n")
 rules = rules.split("\n")
 
-gates = dict(map(lambda gate: gate.split(": "), gates))
-rules = [rule.split() for rule in rules]
+gates: Dict[str, str] = dict(map(lambda gate: gate.split(": "), gates))
+rules: Dict[str, List[str]] = [rule.split() for rule in rules]
 
 # rules by result: result: gate1, gate2, operator
-rbr = {rule[4]: [rule[0], rule[2], rule[1]] for rule in rules}
+rules = {rule[4]: [rule[0], rule[2], rule[1]] for rule in rules}
 
 
-class Node:
-    def __init__(self, name):
-        self.name = name
-        self.requirements: List[Node] = []
-
-
-def run_gates(gates):
-    for rule, vals in rbr.items():
-        gates[rule] = "1" if recurse(*vals) else "0"
+def build_number(gates):
+    for rule, vals in rules.items():
+        gates[rule] = get_gate(*vals)
 
     gates = list(gates.items())
     gates.sort(key=lambda pair: pair[0])
@@ -36,23 +30,19 @@ def run_gates(gates):
     return int("".join(num), 2)
 
 
-def recurse(name1, name2, operator):
-    right = gates.get(name1)
-    if not right:
-        right = recurse(rbr[name1][0], rbr[name1][1], rbr[name1][2])
-    left = gates.get(name2)
-    if not left:
-        left = recurse(rbr[name2][0], rbr[name2][1], rbr[name2][2])
+def get_gate(gate_1, gate_2, operator):
+    right = gates.get(gate_1) or get_gate(*rules[gate_1])
+    left = gates.get(gate_2) or get_gate(*rules[gate_2])
 
-    gates[name1] = "1" if right in [True, "1"] else "0"
-    gates[name2] = "1" if left in [True, "1"] else "0"
+    gates[gate_1] = right
+    gates[gate_2] = left
 
     if operator == "AND":
-        return gates[name1] == "1" and gates[name2] == "1"
+        return "1" if right == "1" and left == "1" else "0"
     if operator == "OR":
-        return gates[name1] == "1" or gates[name2] == "1"
+        return "1" if right == "1" or left == "1" else "0"
     if operator == "XOR":
-        return set(["1", "0"]) == set([gates[name1], gates[name2]])
+        return "1" if set(["1", "0"]) == set([right, left]) else "0"
 
 
-print(run_gates(gates))
+print(build_number(gates))
